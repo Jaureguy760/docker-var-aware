@@ -33,4 +33,4 @@ if [[ -z "${RUNNER_CMD:-}" ]]; then
     exec /bin/bash
 fi
 
-exec /bin/bash -lc "${RUNNER_CMD}"
+exec /bin/bash -lc -- "${RUNNER_CMD}"

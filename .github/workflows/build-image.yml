@@ -49,3 +49,5 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: ghcr.io/jaureguy760/docker-var-aware-baseline:${{ steps.prep.outputs.tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

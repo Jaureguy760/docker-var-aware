@@ -35,26 +35,29 @@ fi
 
 if [[ "${env_exists}" == "0" ]]; then
     "${SOLVER[@]}" create -n "${ENV_NAME}" -y \
-        python=3.10.16 \
+        python=3.10 \
         pip \
-        setuptools=75.8.0 \
-        wheel=0.45.1 \
+        setuptools \
+        wheel \
         packaging=24.2 \
-        pytorch=2.5.1 \
-        torchvision=0.20.1 \
-        torchaudio=2.5.1 \
+        pytorch \
+        torchvision \
+        torchaudio \
         pytorch-cuda=12.1 \
-        pytorch-lightning=2.3.3 \
-        torchmetrics=1.6.1 \
+        lightning=2.4.0 \
         cuda-nvcc=12.9 \
         gcc_linux-64=11 \
         gxx_linux-64=11 \
         'cmake>=3.26' \
         ninja \
-        bcftools=1.21 \
-        samtools=1.21 \
-        tabix=1.11 \
-        htslib=1.21 \
+        'polars>=1.4' \
+        wandb \
+        bitsandbytes \
+        'einops>=0.8' \
+        bcftools \
+        samtools \
+        tabix \
+        htslib \
         -c pytorch -c nvidia -c conda-forge -c bioconda
 fi
 
@@ -62,21 +65,23 @@ set +u
 conda activate "${ENV_NAME}"
 set -u
 
-pip install \
-    lightning==2.3.3 \
-    wandb==0.20.1 \
-    einops==0.8.0 \
+pip install --no-cache-dir \
     peft==0.15.2 \
-    transformers==4.36.2 \
+    transformers==4.52.0 \
     genvarloader==0.17.0 \
-    seqpro==0.7.1 \
-    borzoi-pytorch==0.4.1 \
+    'seqpro>=0.4.0' \
+    borzoi-pytorch \
     bpnet-lite==0.8.1 \
-    DCLS==0.1.1
+    DCLS
 
 if [[ "${INSTALL_FLASH_ATTN}" == "1" ]]; then
     export CUDA_HOME="${CONDA_PREFIX}"
     export FORCE_CUDA=1
     export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST_VALUE}"
-    pip install flash-attn==2.6.3 --no-build-isolation --no-cache-dir
+    # Prefer prebuilt wheel (avoids compiling CUDA kernels under QEMU cross-build).
+    # Falls back to source build if no compatible wheel is found.
+    if ! pip install flash-attn==2.7.2.post1 --no-cache-dir 2>/dev/null; then
+        echo "INFO: No prebuilt wheel for flash-attn 2.7.2.post1, building from source..." >&2
+        pip install flash-attn==2.7.2.post1 --no-build-isolation --no-cache-dir
+    fi
 fi

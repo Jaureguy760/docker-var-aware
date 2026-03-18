@@ -37,5 +37,10 @@ RUN chmod +x /opt/runner/install_runai_ipscs_gvl_env.sh /usr/local/bin/runner-en
     && conda clean -afy \
     && rm -rf /root/.cache/pip
 
+RUN groupadd -g 1000 runner && useradd -m -u 1000 -g runner runner \
+    && mkdir -p /workspace /tmp/numba-cache /tmp/huggingface \
+    && chown -R runner:runner /workspace /tmp/numba-cache /tmp/huggingface
+
+USER runner
 WORKDIR /workspace
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/runner-entrypoint.sh"]
